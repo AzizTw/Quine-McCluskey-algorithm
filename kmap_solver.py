@@ -1,12 +1,16 @@
 import re
 
 def to_binary(num) -> str:
+    """
+    Returns the binary representation of the number in str format
+    """
     binary_num = format(int(num), 'b')
     if len(binary_num) < 4:
         binary_num = "0" * (4 - len(binary_num)) + binary_num
     return binary_num
 
 
+#Only for easier testing only
 def parse_minterms(input):
     minterms = re.findall(r'\d+',input.split("Sum")[1])
     dont_cares = re.findall(r'\d+',input.split("Sum")[2])
@@ -18,20 +22,30 @@ def parse_minterms(input):
     return set(all_minterms), set(without_dont_cares)
 
 
-def differ_by_one_bit(num1, num2):
+def differ_by_one_bit(minterm1, minterm2):
+    """
+    Returns the implicant that differs by one bit from minterm1 and minterm2
+    """
     differ_count = 0
     final_num = ""
-    for i, bit in enumerate(str(num1)):
-        if bit != num2[i]:
+    for bit1, bit2 in zip(minterm1, minterm2):
+        if bit1 != bit2:
             differ_count += 1
             final_num = final_num + "-"
         else:
-            final_num += bit
+            final_num += bit1
 
     return final_num if differ_count == 1 else None
 
 
 def translate_implicant(implicant):
+    """
+    Returns the implicant as a literal form
+    Ex:
+        1--1 -> AD
+        01-- -> A'B
+        --1- -> C'
+    """
     returned_implicant = ""
     for i, bit in enumerate(implicant):
         if bit == "0":
@@ -40,19 +54,26 @@ def translate_implicant(implicant):
             returned_implicant += chr(ord('A') + i)
     return returned_implicant
 
-# determines if a minterm is covered by a prime implicant
+
 def is_covered(minterm,implicant):
+    """
+    Returns true if the minterm is covered by the implicant
+    """
     is_covered = True
-    for i, bit in enumerate(minterm):
-        if implicant[i] == "-":
+    for minterm_bit, implicant_bit in zip(minterm,implicant):
+        if implicant_bit == "-":
             continue
-        elif implicant[i] != bit:
+        elif implicant_bit != minterm_bit:
             is_covered = False
             break
     return is_covered
 
 
 def get_essential_prime_implicants(prime_implicants,without_dont_cares):
+    """
+    Returns the essential prime implicants
+    given the prime implicants and minterms without dont cares
+    """
     essential_prime_implicants = set()
     for minterm in without_dont_cares:
         times_covered = 0
@@ -65,15 +86,26 @@ def get_essential_prime_implicants(prime_implicants,without_dont_cares):
             essential_prime_implicants.add(essential_implicant)
     return essential_prime_implicants
 
-def find_prime_implicants(terms):
-    size_one_implicants = terms
-    size_two_implicants = set()
-    size_four_implicants = set()
-    size_eight_implicants = set()
-    size_sixteen_implicants = set()
+def get_coverage_dicts(prime_implicants,without_dont_cares):
+    """
+    Returns a dictionary of the form {prime_implicant: [minterms_covered]}
+    """
+    essential_prime_implicant = get_essential_prime_implicants(prime_implicants,without_dont_cares)
+    # {prime implicant : minterms that are covered by it}
+    implicant_to_minterms = {implicant:set() for implicant in essential_prime_implicant}
+    # {minterm : set of implicants that cover it}
+    minterm_to_implicants = {minterm:set() for minterm in without_dont_cares}
+    for minterm in without_dont_cares:
+        for implicant in essential_prime_implicant:
+            if is_covered(minterm,implicant):
+                implicant_to_minterms[implicant].add(minterm)
+                minterm_to_implicants[minterm].add(implicant)
+    return implicant_to_minterms, minterm_to_implicants
+
+def get_prime_implicants(minterms):
     prime_implicants = set()
-    implicants_all_sizes = [size_one_implicants,size_two_implicants,
-                            size_four_implicants,size_eight_implicants,size_sixteen_implicants]
+    # a list of sets for each implicant size: 1,2,4,8,16
+    implicants_all_sizes = [minterms if i == 0 else set() for i in range(5)]
     for i, size in enumerate(implicants_all_sizes):
         for implicant1 in size:
             used_once = False
@@ -81,17 +113,23 @@ def find_prime_implicants(terms):
                 differ = differ_by_one_bit(implicant1, implicant2)
                 if differ:
                     used_once = True
-                    implicants_all_sizes[i+1].add(differ)           
+                    implicants_all_sizes[i+1].add(differ)
             if not used_once:
+                #Cannot be expanded further, i.e. Prime Implicant   
                 prime_implicants.add(implicant1)
     return prime_implicants
 
-def get_all_sop_forms(prime_implicants,without_dont_cares):
-    essential_prime_implicant = get_essential_prime_implicants(prime_implicants,without_dont_cares)
-    print(essential_prime_implicant)
+#  ------ Not finished ---------
+def get_all_min_sop_forms(prime_implicants,without_dont_cares):
+    """
+    Returns a set of all minimum SOP forms
+    """
+    essential_prime_implicants = get_essential_prime_implicants(prime_implicants,without_dont_cares)
+    implicant_to_minterms, minterm_to_implicants = get_coverage_dicts(prime_implicants,without_dont_cares)
 
-terms, without_dont_cares = parse_minterms(" Sum(m(0, 3, 5, 6, 8, 9, 10, 12, 14, 15)) + Sum(d(4, 11)).")
-prime_implicants = find_prime_implicants(terms)
+
+terms, without_dont_cares = parse_minterms("F(a, b, c, d) = Sum(m(4,8,11,10,12,15)) + Sum(d(9,14))")
+prime_implicants = get_prime_implicants(terms)
 essential_prime_implicants = get_essential_prime_implicants(prime_implicants,without_dont_cares)
 
 
@@ -101,5 +139,12 @@ print(f'Essential prime implicants: {essential_prime_implicants}')
 
 for i, essential_prime_implicant in enumerate(essential_prime_implicants):
     print(f'Essential prime implicant {i+1} = {translate_implicant(essential_prime_implicant)}')
+
+for i, prime_implicant in enumerate(prime_implicants):
+    print(f'Prime implicant {i+1} = {translate_implicant(prime_implicant)}')
+
+print(f'SOP forms: {get_all_min_sop_forms(prime_implicants,without_dont_cares)}')
+
+
 
 
