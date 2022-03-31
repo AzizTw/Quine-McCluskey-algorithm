@@ -46,6 +46,10 @@ def translate_implicant(implicant):
         01-- -> A'B
         --1- -> C'
     """
+
+    # if it covers all the minterms
+    if implicant.count("-") == len(implicant):
+        return "1"
     returned_implicant = ""
     for i, bit in enumerate(implicant):
         if bit == "0":
@@ -75,28 +79,39 @@ def get_essential_prime_implicants(prime_implicants,without_dont_cares):
     given the prime implicants and minterms without dont cares
     """
     essential_prime_implicants = set()
-    for minterm in without_dont_cares:
-        times_covered = 0
-        essential_implicant = ""
-        for implicant in prime_implicants:
-            if is_covered(minterm,implicant):
-                essential_implicant = implicant
-                times_covered += 1
-        if times_covered == 1:
-            essential_prime_implicants.add(essential_implicant)
+    implicant_to_minterms, minterm_to_implicants = get_coverage_dicts(prime_implicants,without_dont_cares)
+
+    for minterm, prime_implicants in minterm_to_implicants.items():
+        #If the minterm is covered by only one prime implicant, it is essential
+        if len(prime_implicants) == 1:
+            essential_prime_implicant = prime_implicants.pop()
+            essential_prime_implicants.add(essential_prime_implicant)
+
+
+    
+    # essential_prime_implicants = set()
+    # for minterm in without_dont_cares:
+    #     times_covered = 0
+    #     essential_implicant = ""
+    #     for implicant in prime_implicants:
+    #         if is_covered(minterm,implicant):
+    #             essential_implicant = implicant
+    #             times_covered += 1
+    #     if times_covered == 1:
+    #         essential_prime_implicants.add(essential_implicant)
+    # print(f'Set 1 and Set 2 are equal : {essential_prime_implicants1 == essential_prime_implicants}')
     return essential_prime_implicants
 
 def get_coverage_dicts(prime_implicants,without_dont_cares):
     """
     Returns a dictionary of the form {prime_implicant: [minterms_covered]}
     """
-    essential_prime_implicant = get_essential_prime_implicants(prime_implicants,without_dont_cares)
     # {prime implicant : minterms that are covered by it}
-    implicant_to_minterms = {implicant:set() for implicant in essential_prime_implicant}
+    implicant_to_minterms = {implicant:set() for implicant in prime_implicants}
     # {minterm : set of implicants that cover it}
     minterm_to_implicants = {minterm:set() for minterm in without_dont_cares}
     for minterm in without_dont_cares:
-        for implicant in essential_prime_implicant:
+        for implicant in prime_implicants:
             if is_covered(minterm,implicant):
                 implicant_to_minterms[implicant].add(minterm)
                 minterm_to_implicants[minterm].add(implicant)
@@ -124,11 +139,26 @@ def get_all_min_sop_forms(prime_implicants,without_dont_cares):
     """
     Returns a set of all minimum SOP forms
     """
+    possible_sops = []
+    minterms_needed_to_get_covered = without_dont_cares.copy()
     essential_prime_implicants = get_essential_prime_implicants(prime_implicants,without_dont_cares)
     implicant_to_minterms, minterm_to_implicants = get_coverage_dicts(prime_implicants,without_dont_cares)
+    # determining the minterms that are covered by essential prime implicants
+    for essential_prime_implicant in essential_prime_implicants:
+        for minterm in implicant_to_minterms[essential_prime_implicant]:
+            if minterm in minterms_needed_to_get_covered:
+                minterms_needed_to_get_covered.remove(minterm)
+    print(f'Minterms needed to get covered: {minterms_needed_to_get_covered}')
+    #all combinations of sops
+    
+
+    
+    print(f'possible sops: {possible_sops}')
 
 
-terms, without_dont_cares = parse_minterms("F(a, b, c, d) = Sum(m(4,8,11,10,12,15)) + Sum(d(9,14))")
+# terms, without_dont_cares = parse_minterms("F(a, b, c, d) = Sum(m(4,8,11,10,12,15)) + Sum(d(9,14))")
+terms, without_dont_cares = parse_minterms("Let F(a, b, c, d) = Sum(m(1, 2, 3, 4, 6, 9, 13, 14, 15)) + Sum(d(11))")
+# terms, without_dont_cares = parse_minterms("Let F(a, b, c, d) = Sum(m(1, 2, 3, 4, 6, 9, 13, 14, 15,0,5,7,12,8,10,11)) + Sum(d())")
 prime_implicants = get_prime_implicants(terms)
 essential_prime_implicants = get_essential_prime_implicants(prime_implicants,without_dont_cares)
 
