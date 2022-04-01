@@ -1,3 +1,4 @@
+from itertools import combinations
 import re
 
 def to_binary(num) -> str:
@@ -46,7 +47,6 @@ def translate_implicant(implicant):
         01-- -> A'B
         --1- -> C'
     """
-
     # if it covers all the minterms
     if implicant.count("-") == len(implicant):
         return "1"
@@ -58,6 +58,11 @@ def translate_implicant(implicant):
             returned_implicant += chr(ord('A') + i)
     return returned_implicant
 
+def count_literals(sop):
+    """
+    Returns the number of literals in the sop
+    """
+    return sum([(len(implicant) - implicant.count("-")) for implicant in sop])
 
 def is_covered(minterm,implicant):
     """
@@ -134,6 +139,31 @@ def get_prime_implicants(minterms):
                 prime_implicants.add(implicant1)
     return prime_implicants
 
+def is_covering_all_minterms(sop: set, minterms: set):
+    """
+    Returns true if the sop covers all the minterms
+    """
+    covered_minterms = set()
+    for implicant in sop:
+        for minterm in minterms:
+            if is_covered(minterm,implicant):
+                covered_minterms.add(minterm)
+    return covered_minterms == minterms
+
+# def is_covering_all_minterms(sop: set, implicant_to_minterms: dict, without_dont_cares: set, minterms: set):
+#     """
+#     Returns true if the SOP covers all the minterms
+#     """
+#     prime_implicants = get_prime_implicants(minterms)
+#     implicant_to_minterms, minterm_to_implicants = get_coverage_dicts(prime_implicants,implicant_to_minterms)
+#     covered_minterms = set()
+#     for implicant in sop:
+#         for minterm in implicant_to_minterms[implicant]:
+#             covered_minterms.add(minterm)
+#             print(f'{minterm} is covered by {implicant}')
+        
+#     return covered_minterms == without_dont_cares
+
 #  ------ Not finished ---------
 def get_all_min_sop_forms(prime_implicants,without_dont_cares):
     """
@@ -149,20 +179,46 @@ def get_all_min_sop_forms(prime_implicants,without_dont_cares):
             if minterm in minterms_needed_to_get_covered:
                 minterms_needed_to_get_covered.remove(minterm)
     print(f'Minterms needed to get covered: {minterms_needed_to_get_covered}')
+    if len(minterms_needed_to_get_covered) == 0:
+        return [list(essential_prime_implicants)]
     #all combinations of sops
+    #print all implicants that can cover the minterms
+    usable_implicants = set()
+    for implicant in prime_implicants:
+        for minterm in minterms_needed_to_get_covered:
+            if is_covered(minterm,implicant):
+                usable_implicants.add(implicant)
+                
+    base_sop = list(essential_prime_implicants)
+    possible_sops = []
+    for i in range(1,len(minterms_needed_to_get_covered)+1):
+        possible_sops.extend(list(combinations(usable_implicants,i)))
     
-
+    sops = list()
+    for tuble in possible_sops:
+        sop = base_sop.copy()
+        for implicant in tuble:
+            sop.append(implicant)
+        if is_covering_all_minterms(sop,without_dont_cares):
+            sops.append(sop)
+    min_sop_len = min([len(sop) for sop in sops])
+    min_sops = []
+    for sop in sops:
+        if len(sop) == min_sop_len:
+            min_sops.append(sop)
+    return min_sops
     
     print(f'possible sops: {possible_sops}')
 
 
 # terms, without_dont_cares = parse_minterms("F(a, b, c, d) = Sum(m(4,8,11,10,12,15)) + Sum(d(9,14))")
-terms, without_dont_cares = parse_minterms("Let F(a, b, c, d) = Sum(m(1, 2, 3, 4, 6, 9, 13, 14, 15)) + Sum(d(11))")
+terms, without_dont_cares = parse_minterms(input("Enter function: "))
+# terms, without_dont_cares = parse_minterms("Let F(a, b, c, d) = Sum(m(0, 3, 5, 6, 8, 9, 10, 12, 14, 15)) + Sum(d(4, 11)).")
 # terms, without_dont_cares = parse_minterms("Let F(a, b, c, d) = Sum(m(1, 2, 3, 4, 6, 9, 13, 14, 15,0,5,7,12,8,10,11)) + Sum(d())")
 prime_implicants = get_prime_implicants(terms)
 essential_prime_implicants = get_essential_prime_implicants(prime_implicants,without_dont_cares)
-
-
+implicant_to_minterms, minterm_to_implicants = get_coverage_dicts(prime_implicants,without_dont_cares)
+sops = get_all_min_sop_forms(prime_implicants,without_dont_cares)
 print(f'Terms = {terms}')
 print(f'Prime implicants: {prime_implicants}')
 print(f'Essential prime implicants: {essential_prime_implicants}')
@@ -175,6 +231,11 @@ for i, prime_implicant in enumerate(prime_implicants):
 
 print(f'SOP forms: {get_all_min_sop_forms(prime_implicants,without_dont_cares)}')
 
+print(sops)
+for i,sop in enumerate(sops):
+    print(f'SOP {i+1}: {" + ".join(list(map(translate_implicant,sop)))}')
 
-
-
+print(f'F has {len(essential_prime_implicants)} essential prime implicants')
+print(f'F has {len(prime_implicants)} prime implicants')
+print(f'The simplest SOP form has {count_literals(sops[0])} literals')
+print(f'The number of minimal SOP forms of F is {len(sops)}')
