@@ -1,7 +1,9 @@
-from kmap import KMap
+from kmap_solver import KMap
+
 num_of_variables = int(input("Enter the number of variables: "))
-minterms = set(map(int, input("Enter the minterms: ").split()))
-dont_cares = set(map(int, input("Enter the dont cares: ").split()))
+bit_limit = ((2**num_of_variables)-1)
+minterms = set(map(int, input(f"Enter the minterms (Between 0 to {bit_limit}): ").split()))
+dont_cares = set(map(int, input(f"Enter the dont cares (Between 0 to {bit_limit}): ").split()))
 
 my_kmap = KMap(num_of_variables, minterms, dont_cares)
 
@@ -21,3 +23,5 @@ for i, EPI in enumerate(EPIs):
 print()
 for i, sop in enumerate(sops):
     print(f'SOP {i+1}: {" + ".join(list(map(my_kmap.translate_implicant,sop)))}')
+    
+print()

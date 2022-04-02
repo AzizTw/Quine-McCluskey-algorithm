@@ -1,26 +1,23 @@
 from itertools import combinations
 
 class KMap:
-    def __init__(self, num_of_variables: int, minterms: set, dont_cares: set):
-        self.num_of_variables = num_of_variables
+    def __init__(self, num_of_vars: int, minterms: set, dont_cares: set):
+        self.num_of_vars = num_of_vars
         self.minterms = set(map(self.to_binary, minterms))
         self.dont_cares = set(map(self.to_binary, dont_cares))
         self.minterms_and_dont_cares = self.minterms.union(self.dont_cares)
         self.prime_implicants = self.get_prime_implicants()
-        self.implicant_to_minterms = self.get_coverage_dicts()[0]
-        self.minterm_to_implicants = self.get_coverage_dicts()[1]
+        self.implicant_to_minterms, self.minterm_to_implicants = self.get_coverage_dicts()
         self.essential_prime_implicants = self.get_essential_prime_implicants()
 
-        
-    
 
     def to_binary(self, num) -> str:
         """
         Returns the binary representation of the number in str format
         """
         binary_num = format(int(num), 'b')
-        if len(binary_num) < self.num_of_variables:
-            binary_num = "0" * (self.num_of_variables - len(binary_num)) + binary_num
+        if len(binary_num) < self.num_of_vars:
+            binary_num = "0" * (self.num_of_vars - len(binary_num)) + binary_num
         return binary_num
     def differ_by_one_bit(self, minterm1, minterm2):
         """
@@ -96,7 +93,7 @@ class KMap:
     def get_prime_implicants(self):
         prime_implicants = set()
         # a list of sets for each implicant size: 1,2,4,8,16
-        implicants_all_sizes = [self.minterms if i == 0 else set() for i in range(len(list(self.minterms)[0])+1)]  # edit
+        implicants_all_sizes = [self.minterms_and_dont_cares if i == 0 else set() for i in range(self.num_of_vars+1)]
         for i, size in enumerate(implicants_all_sizes):
             for implicant1 in size:
                 used_once = False
@@ -120,8 +117,7 @@ class KMap:
         for minterm, prime_implicants in self.minterm_to_implicants.items():
             #If the minterm is covered by only one prime implicant, it is essential
             if len(prime_implicants) == 1:
-                essential_prime_implicant = prime_implicants.pop()
-                essential_prime_implicants.add(essential_prime_implicant)
+                essential_prime_implicants = essential_prime_implicants.union(prime_implicants)
 
         return essential_prime_implicants
     
@@ -136,6 +132,7 @@ class KMap:
                     covered_minterms.add(minterm)
         return covered_minterms == self.minterms
 
+    #   NEEDS MORE IMPROVEMENT, VARIABLE NAMES + CLEANING UP
     def get_all_min_sop_forms(self):
         """
         Returns all the min sop forms
@@ -169,7 +166,7 @@ class KMap:
             sop = base_sop.copy()
             for implicant in tuble:
                 sop.append(implicant)
-            if self.is_covering_all_minterms(sop,self.minterms):
+            if self.is_covering_all_minterms(sop):
                 sops.append(sop)
         min_sop_len = min([len(sop) for sop in sops])
         min_sops = []
