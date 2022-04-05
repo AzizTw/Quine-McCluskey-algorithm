@@ -2,7 +2,11 @@ from itertools import combinations
 
 class KMap:
     def __init__(self, num_of_vars: int, minterms: set, dont_cares: set):
+        """
+        Initializes the KMap object
+        """
         self.num_of_vars = num_of_vars
+        # minterms and dont cares are converted to binary
         self.minterms = set(map(self.to_binary, minterms))
         self.dont_cares = set(map(self.to_binary, dont_cares))
         self.minterms_and_dont_cares = self.minterms.union(self.dont_cares)
@@ -16,6 +20,7 @@ class KMap:
         """
         binary_num = format(int(num), 'b')
         if len(binary_num) < self.num_of_vars:
+            # 0 extension to the left
             binary_num = "0" * (self.num_of_vars - len(binary_num)) + binary_num
         return binary_num
 
@@ -120,21 +125,21 @@ class KMap:
 
         return essential_prime_implicants
     
-    def is_covering_all_minterms(self,base_sop):
+    def is_covering_all_minterms(self,possible_min_sop):
         """
-        Returns true if the base_sop covers all the minterms
+        Returns true if the possible_min_sop covers all the minterms
         """
         covered_minterms = set()
-        for implicant in base_sop:
+        for implicant in possible_min_sop:
             for minterm in self.minterms:
                 if self.is_covered(minterm,implicant):
                     covered_minterms.add(minterm)
         return covered_minterms == self.minterms
 
-    #   Can be optimized more
+    # Can be optimized more
     def get_all_min_sop_forms(self):
         """
-        Returns all the min base_sop forms
+        Returns all the min possible_min_sop forms
         """
         #determining the minterms that are not covered by essential prime implicants
         minterms_not_covered = self.minterms.copy()
@@ -156,19 +161,18 @@ class KMap:
                         
             combinations_of_implicants = list()
             for i in range(1,len(minterms_not_covered)+1):
+                #generate all combinations of prime implicants, of length 1 to len(minterms_not_covered)
                 combinations_of_implicants.extend(list(combinations(usable_implicants,i)))
             
-            possible_min_sops = list()
-            for combination in combinations_of_implicants:
-                base_sop = list(self.essential_prime_implicants)
-                for prime_implicant in combination:
-                    base_sop.append(prime_implicant)
-                if self.is_covering_all_minterms(base_sop):  #if found, lock the length of the sop
-                    possible_min_sops.append(base_sop)
-
-            min_sop_len = min([self.count_literals(min_sop) for min_sop in possible_min_sops])
             min_sops = list()
-            for possible_min_sop in possible_min_sops:
-                if self.count_literals(possible_min_sop) == min_sop_len:
-                    min_sops.append(possible_min_sop)
+            min_sop_len = 0
+            for combination in combinations_of_implicants:
+                possible_min_sop = list(self.essential_prime_implicants)
+                possible_min_sop.extend(combination)
+                if self.is_covering_all_minterms(possible_min_sop):
+                    if min_sop_len == 0:    
+                        min_sop_len = self.count_literals(possible_min_sop)
+                        min_sops.append(possible_min_sop)
+                    elif self.count_literals(possible_min_sop) == min_sop_len:   
+                        min_sops.append(possible_min_sop)
             return min_sops
