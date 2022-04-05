@@ -10,7 +10,6 @@ class KMap:
         self.implicant_to_minterms, self.minterm_to_implicants = self.get_coverage_dicts()
         self.essential_prime_implicants = self.get_essential_prime_implicants()
 
-
     def to_binary(self, num) -> str:
         """
         Returns the binary representation of the number in str format
@@ -19,6 +18,7 @@ class KMap:
         if len(binary_num) < self.num_of_vars:
             binary_num = "0" * (self.num_of_vars - len(binary_num)) + binary_num
         return binary_num
+
     def differ_by_one_bit(self, minterm1, minterm2):
         """
         Returns the implicant that differs by one bit from minterm1 and minterm2
@@ -54,11 +54,11 @@ class KMap:
         return returned_implicant
     
 
-    def count_literals(self, base_sop):
+    def count_literals(self, sop):
         """
-        Returns the number of literals in the base_sop
+        Returns the number of literals in the sop
         """
-        return sum([(len(implicant) - implicant.count("-")) for implicant in base_sop])
+        return sum([(len(implicant) - implicant.count("-")) for implicant in sop])
 
     def is_covered(self, minterm,implicant):
         """
@@ -72,7 +72,6 @@ class KMap:
                 is_covered = False
                 break
         return is_covered
-
 
     def get_coverage_dicts(self):
         """
@@ -108,7 +107,6 @@ class KMap:
                     prime_implicants.add(implicant1)
         return prime_implicants
     
-
     def get_essential_prime_implicants(self):
         """
         Returns the essential prime implicants
@@ -165,12 +163,12 @@ class KMap:
                 base_sop = list(self.essential_prime_implicants)
                 for prime_implicant in combination:
                     base_sop.append(prime_implicant)
-                if self.is_covering_all_minterms(base_sop):  #Review this line later
+                if self.is_covering_all_minterms(base_sop):  #if found, lock the length of the sop
                     possible_min_sops.append(base_sop)
 
-            min_sop_len = min([len(min_sop) for min_sop in possible_min_sops])
+            min_sop_len = min([self.count_literals(min_sop) for min_sop in possible_min_sops])
             min_sops = list()
             for possible_min_sop in possible_min_sops:
-                if len(possible_min_sop) == min_sop_len:
-                    min_sops.append(base_sop)
+                if self.count_literals(possible_min_sop) == min_sop_len:
+                    min_sops.append(possible_min_sop)
             return min_sops
