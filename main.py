@@ -1,7 +1,7 @@
 def main():
     from kmap_solver import KMap
 
-    num_of_variables = int(input("Enter the number of variables: "))
+    num_of_variables = int(input("Enter the number of variables (Between 0 to 26): "))
     bit_limit = ((2**num_of_variables)-1)
     minterms = set(map(int, input(f"Enter the minterms (Between 0 to {bit_limit}): ").split()))
     dont_cares = set(map(int, input(f"Enter the dont cares (Between 0 to {bit_limit}): ").split()))
@@ -14,19 +14,18 @@ def main():
 
     print("\nRESULTS:\n")
 
-    for i, PI in enumerate(PIs):
-        print(f'PI {i+1} = {PI}')
-
-    print()
-
     if len(EPIs) == 0:
         print("No essential prime implicants")
     else:
         for i, EPI in enumerate(EPIs):
             print(f'EPI {i+1} = {EPI}')
 
-    print()
 
+    print()
+    for i, PI in enumerate(PIs):
+        print(f'PI {i+1} = {PI}')
+
+    print()
     for i, sop in enumerate(sops):
         print(f'SOP {i+1}: {" + ".join(list(map(my_kmap.translate_implicant,sop)))}')
 
