@@ -2,7 +2,7 @@
 Python implementation of Quine–McCluskey algorithm to find:  
 * The Prime Implicants  
 * The Essential Prime Implicants  
-* All minimum sums of products forms    
+* All minimum sum of products forms    
 <br>
 
 ## Up to 26 variables
