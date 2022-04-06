@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Quine-McCluskey algorithm
 Python implementation of Quine–McCluskey algorithm to find:  
 * The Prime Implicants  
@@ -21,3 +22,10 @@ _For any given function._
 ## Sample run:
 
 ![](/imgs/Sample.jpg "Sample Run")
+=======
+# McCluskey
+Using Quine–McCluskey algorithm to solve K-Maps
+## Up to 26 variables
+Sample run:\
+![](/imgs/Sample.jpg "Sample Run")
+>>>>>>> 263cd87b443b82f6c3542d0c45a1ab5572bc51f0
