@@ -1,5 +1,5 @@
 # Quine-McCluskey algorithm
-Python implementation of Quine–McCluskey algorithm to find:  
+Python implementation of [Quine–McCluskey algorithm](https://en.wikipedia.org/wiki/Quine%E2%80%93McCluskey_algorithm) to find:  
 * The Prime Implicants  
 * The Essential Prime Implicants  
 * All minimum sums of products forms    
