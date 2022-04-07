@@ -12,7 +12,7 @@ _For any given function._
 ## How to use
 1- Enter the number of variables of your K-Map  
 2- Enter the minterms' indices  
-3- Enter the don't cares, if any. else just insert a new line (Press Enter)
+3- Enter the don't cares if any, else just insert a new line (Press Enter)
 <br>
 
 ## Sample run:
