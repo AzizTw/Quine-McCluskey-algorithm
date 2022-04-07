@@ -38,7 +38,7 @@ def main():
 
     intersection = minterms & dont_cares
     if(intersection):
-        raise ValueError(f"minterms and dont_cares are not unique {intersection}")
+        raise ValueError(f"minterms and dont_cares are not disjoint {intersection}")
 
 
     my_kmap = KMap(num_of_variables, minterms, dont_cares)
