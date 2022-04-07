@@ -22,7 +22,7 @@ def main():
                 nargs='+', choices=range(bit_limit+1), help='Minterms')
 
         # don't cares are optional
-        parser.add_argument('--dont-cares', metavar='d', nargs='*',
+        parser.add_argument('-d', '--dont-cares', metavar='d', nargs='*',
                 type=int, help="Don't cares", choices=range(bit_limit+1))
 
         args = parser.parse_args();
