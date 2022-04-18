@@ -12,7 +12,7 @@ _For any given function._
 ## How to use  
 You can choose whether you want to run it interactively or not.  
 
-For to use the interactive mode, you should run the following command:
+To use the interactive mode, you should run the following command:
 ```python main.py -i```  
   
 For non-interactive use, you should run ```python main.py``` and specify the number of variables in the first argument, and then your minterms, and finally, the dont-cares which are optional.  
