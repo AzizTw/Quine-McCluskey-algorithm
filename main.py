@@ -1,6 +1,7 @@
 def main():
     from kmap_solver import KMap
     from argparse import ArgumentParser, BooleanOptionalAction
+    import sys
 
     parser = ArgumentParser(description="find prime implicants, essential prime implicants, and all minimum sum of products forms.")
 
@@ -11,9 +12,9 @@ def main():
 
     # maybe split this if block into its own function? I'm
     # reluctent to to change the structure of main though
-    if not args.interactive:
+    if not args.interactive and len(sys.argv) > 1:
         parser.add_argument('num_of_variables', metavar='v', type=int,
-                choices=range(27), help='Number of variables in the kmap')
+                choices=range(1,27), help='Number of variables in the kmap')
 
         args = parser.parse_known_args()[0]
         bit_limit = ((2**args.num_of_variables)-1)
@@ -25,13 +26,13 @@ def main():
         parser.add_argument('-d', '--dont-cares', metavar='d', nargs='*',
                 type=int, help="Don't cares", choices=range(bit_limit+1))
 
-        args = parser.parse_args();
+        args = parser.parse_args()
         num_of_variables = args.num_of_variables
         minterms = set(args.minterms)
         dont_cares = set(args.dont_cares) if args.dont_cares is not None else set()
 
     else:
-        num_of_variables = int(input("Enter the number of variables (Between 0 to 26): "))
+        num_of_variables = int(input("Enter the number of variables (Between 1 to 26): "))
         bit_limit = ((2**num_of_variables)-1)
         minterms = set(map(int, input(f"Enter the minterms (Between 0 to {bit_limit}): ").split()))
         dont_cares = set(map(int, input(f"Enter the dont cares (Between 0 to {bit_limit}): ").split()))
