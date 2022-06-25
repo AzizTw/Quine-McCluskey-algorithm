@@ -11,7 +11,7 @@ def main():
 
     # maybe split this if block into its own function? I'm
     # reluctent to to change the structure of main though
-    if not args.interactive:
+    if not args.interactive and len(sys.argv) > 1:
         parser.add_argument('num_of_variables', metavar='v', type=int,
                 choices=range(27), help='Number of variables in the kmap')
 
