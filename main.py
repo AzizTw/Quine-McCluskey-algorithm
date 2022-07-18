@@ -1,4 +1,5 @@
 def main():
+    import sys
     from kmap_solver import KMap
     from argparse import ArgumentParser, BooleanOptionalAction
     import sys
