@@ -5,12 +5,10 @@ Python implementation of [Quine–McCluskey algorithm](https://en.wikipedia.org/
 * The Prime Implicants
 * The Essential Prime Implicants
 * All minimum sum of products forms
-  `<br>`
 
 ## Up to 26 variables
 
 _For any given function._
-`<br>`
 
 ## How to use
 
