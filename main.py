@@ -5,14 +5,11 @@ def main():
 
     parser = ArgumentParser(description="find prime implicants, essential prime implicants, and all minimum sum of products forms.")
 
-    parser.add_argument('-i', '--interactive', action=BooleanOptionalAction,
-            default=False)
-
     args = parser.parse_known_args()[0]
 
     # maybe split this if block into its own function? I'm
     # reluctent to to change the structure of main though
-    if not args.interactive and len(sys.argv) > 1:
+    if len(sys.argv) > 1:
         parser.add_argument('num_of_variables', metavar='v', type=int,
                 choices=range(1,27), help='Number of variables in the kmap')
 
